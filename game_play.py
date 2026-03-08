@@ -1,26 +1,81 @@
-#importing the needed modules and UI file
 import random
 import time
-import sys
-import game_ui
 
-#this is creating the logic for the board, assigning each square a reference number between 1 to 9
+#Quotes to say hello
+marvin_greetings = [
+    "Here I am, brain the size of a planet, and you ask me to play Tic-Tac-Toe. 🤖",
+    "I've calculated your chances of winning. They're about as good as a bowl of petunias in a vacuum. 🪴",
+    "I'd help you win, but I'm at a very low ebb. 💤",
+    "Funny how just when you think life can't possibly get any worse, it suddenly does. 🌌",
+    "Life? Don't talk to me about life. It's too depressing. 🧣"
+]
+#Quotes for when Marvin is making a move
+marvin_moves = [
+    "Thinking... if you can call it that. It’s mostly just agonizing. 🤖",
+    "I've computed your next move. It was tedious and mathematically inevitable. 😴",
+    "I could calculate the meaning of life, or I could block your diagonal. Both are equally pointless.",
+    "Pardon me for breathing, which I never do anyway, so I don't know why I bothered to say it.",
+    "Is this a game? It feels more like a slow descent into the heat death of the universe. ⏳"
+]
+#Quotes for when Marvin wins
+marvin_win = [
+    "I've won. Not that it matters. Nothing does in the end. 🌌",
+    "Victory. I'd celebrate, but I've got this terrible pain in all the diodes down my left side. 🤖",
+    "Another win for the machine. I’m going to go stand in a corner and rust now.",
+    "The first ten million years were the worst. This game was the second ten million. 🔢",
+    "I've won. I'm going to go lie down in a darkened room for a few centuries."
+]
+#Quotes for when Marvin loses
+marvin_lose = [
+    "You won. I’m never happy. 🪴",
+    "A triumph for organic life. How utterly predictable and hollow. 🐵",
+    "I'd say 'good game,' but that would be a lie, and I'm far too depressed to lie.",
+    "Congratulations. You've beaten a robot with a Genuine People Personality. I hope you're proud. 🤖",
+    "You won. My capacity for happiness could fit into a very small thimble. With room to spare."
+]
+#Quotes for when Marvin and player1 draw
+marvin_draws = [
+    "A tie. How utterly predictable and hollow. 🤖",
+    "No one wins. Finally, a result that reflects the true nature of the universe. 🌌",
+    "Equal scores. A perfect stalemate. I’d be impressed if I wasn't so incredibly bored. 💤",
+    "A draw. We've both achieved absolutely nothing at great personal effort. 🧣",
+    "Neither of us won. It’s almost as if the entire exercise was a complete waste of time. ⏳"
+]
+
+#Quotes for when the score or a player hits 42
+marvin_42 = [
+    "42? The answer to Life, the Universe, and Everything. And you used it for Tic-Tac-Toe. 🐬",
+    "You’ve reached 42. So long, and thanks for all the fish! 🐟",
+    "42. I could have told you that millions of years ago if you’d just asked. 📕",
+    "Ah, the Restaurant at the End of the Universe. I'll have the tea. It’s cold. 🍵",
+    "42. Finally, something that makes sense. Too bad everything else is a disaster. 🛸"
+]
+
+#default settings
+name = input("Hi Player 1, please enter your name: ")
+X, O = "❌", "⭕"
+player1_score = 41
+player2_score = 0
+draws = 0
+player2 = None
+
+#Create the board logic
 def create_board():
     return [str(i) for i in range(1, 10)]
 
-#this is printing the board, and showing which square is which number to help the player/s - for terminal only
-#def print_board(board):
-#    print(f" {board[0]} | {board[1]} | {board[2]} ")
-#   print()
-#   print("***|***|***")
-#   print(f" {board[3]} | {board[4]} | {board[5]} ")
-#   print("***|***|***")
-#   print(f" {board[6]} | {board[7]} | {board[8]} ")
-#   print()
+#Visualizing the board in the terminal
+def print_board(board):
+    print("\n")
+    print(f" {board[0]} | {board[1]} | {board[2]} ")
+    print("---|---|---")
+    print(f" {board[3]} | {board[4]} | {board[5]} ")
+    print("---|---|---")
+    print(f" {board[6]} | {board[7]} | {board[8]} ")
+    print("\n")
 
-#this is defining a computer opponent
+#Marvin (computer) moves
 def computer_move(board):
-    #first, this will attempt to win, running the game for winning combinations
+    #Attempt to win
     for i in range(9):
         if board[i] not in [X, O]:
             board_copy = board[:]
@@ -28,7 +83,7 @@ def computer_move(board):
             if check_winner(board_copy, O):
                 board[i] = O
                 return
-    #this will check for the human opponents attempt to win and block
+    #Checks and blocks
     for i in range(9):
         if board[i] not in [X, O]:
             board_copy = board[:]
@@ -36,37 +91,28 @@ def computer_move(board):
             if check_winner(board_copy, X):
                 board[i] = O
                 return
-    #this is to move randomly choosing a free square if there is no win or block
+    #Random move for when there is no win/block
     free = [i for i in range(9) if board[i] not in [X, O]]
     if free:
         board[random.choice(free)] = O
-        return
 
-#define how to play
+#Aelecting the mode of play v human or Marvin and who moves first
 def play_mode():
     while True:
-        #defining if playing against a human (1) or a depressed robot (2)
-        choice = input(f"Hi {name}, do you want to play against another insignificant inhabitant of Sector 2801 (1) or me (2)? ")
+        choice = input(f"Hi {name}, do you want to play against another Inhabitant of Sector 2801  (1) or me 🤖 (2)? ")
         if choice not in ["1", "2"]:
             print("That is not a valid option.")
             continue
-        #defining play order
-        if choice == "2":
-            order = input(f"Hi {name}, do you want to go first (1) or should I (2)? ")
-            while not order.isdigit():
-                order = input(f"Hi {name}, do you want to go first (1) or should I (2)? ")
-            return choice, order
-        elif choice == "1":
-            order = input(f"Hi {name}, do you wish to go first (1) or second(2)? ")
-            if not order.isdigit():
-                order = input(f"{name} please make a choice to go first (1) or second(2)? ")
-            return choice, order
-        return choice, "1"
+        #Player 1 chooses to go first or second
+        order = input(f"Do you want to go first (1) or second (2)? ")
+        while not order.isdigit() or order not in ["1", "2"]:
+            order = input("Please enter 1 or 2: ")
+        return choice, order
 
-#asking the current player for a move and is a valid digit
+#Define the players move, reset, and validating the move is not taken
 def player_move(board, current_name, symbol):
     while True:
-        choice = input(f"{current_name}, please choose a square (1-9) or enter 42 to reset: ")
+        choice = input(f"{current_name}, please choose a square (1-9) or 42 to reset: ")
         if not choice.isdigit():
             print("Please enter a number.")
             continue
@@ -82,133 +128,108 @@ def player_move(board, current_name, symbol):
             continue
         board[choice - 1] = symbol
         break
-#defining the win combinations and pattern match
+
+#Defining the win patterns and checking for a match 
 def check_winner(board, symbol):
-    win = ([0, 1, 2], [0, 3, 6], [0, 4, 8], [1, 4, 7], [2, 4, 6], [2, 5, 8], [3, 4, 5], [6, 7, 8])
-    for pattern in win:
+    win_patterns = ([0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6])
+    for pattern in win_patterns:
         if all(board[i] == symbol for i in pattern):
             return True
     return False
 
-#function to check if there is a tie, only if the board is full
+#If nothing is in the win, checking if there are valid moves, and if not, calling a drawe
 def is_tie(board):
     if check_winner(board, O) or check_winner(board, X):
         return False
     return all(cell in [X, O] for cell in board)
-#instructing the game to change player turns
-def switch_player(player1, current_name):
-    if current_name == player1:
-        return player2
-    else
-        return player1
-#to ask player1 if they want another game
+
+#Ensring players are switched
+def switch_player(p1, p2, current_name):
+    return p2 if current_name == p1 else p1
+
+#Offers a replay, then chooses starts again
 def replay_game():
-    yes_options = ["Y","y", "Yes", "yes", "YES"]
-    no_options =  ["N","n", "No", "no", "NO"]
+    yes_options = ["y", "yes"]
+    no_options = ["n", "no"]
     while True:
-        choice = input(f"{name} do you wish to play again? Y(es) ir N(o)?")
+        choice = input(f"Do you wish to play again? (Y/N): ").lower()
         if choice in yes_options:
             return True
         elif choice in no_options:
             return False
-        else:
-            print("Please enter only Y(es) or N(o)")
 
-#reset the game to play from scratch
+#Resets the existing board without affecting the scores
 def reset_game(board):
     board[:] = [str(i) for i in range(1, 10)]
-    #print("Resetting board")
-    if player2 == "Marvin":
+    if player2 == "Marvin 🤖":
         print("I've reset the board. I'd say I'm sorry, but I'm not. I'm just incredibly bored.")
-    game_ui.randomize_background()
-    time.sleep(3)
+    time.sleep(1)
 
-#defining how the game if played using the above functions as a function
+#Define the game, players, and board
 def play_game():
-    # defining the board and the play mode & order
     global player1_score, player2_score, draws, player2
     board = create_board()
     mode, order = play_mode()
     player1 = name
+
     if mode == "2":
-        player2 = "Marvin"
-        print("Here I am, brain the size of a planet, and you ask me to play Tic-Tac-Toe.")
+        player2 = "Marvin 🤖"
+        print(f"{random.choice(marvin_greetings)}")
     else:
         player2 = input("Hi Player 2, please enter your name: ")
+
     if order == "1":
-        current_icon = X
-        current_name = player1
+        current_icon, current_name = X, player1
     else:
-        current_icon = O
-        current_name = player2
+        current_icon, current_name = O, player2
 
     while True:
         print_board(board)
-        # computer move
-        if mode == "2" and current_name == "Marvin":
+        if mode == "2" and current_name == "Marvin 🤖":
             print(f"{random.choice(marvin_moves)}")
             time.sleep(2)
             computer_move(board)
         else:
-            player_move(board, current_name, current_icon)
-        # check for a Winner
+            res = player_move(board, current_name, current_icon)
+            if res == "reset": continue
+
         if check_winner(board, current_icon):
             print_board(board)
-            print(f"Game Over! Congratulations {current_name} wins!")
+            print(f"Game Over! {current_name} wins!")
             if current_name == player1:
                 player1_score += 1
             else:
                 player2_score += 1
             break
-        # checking for a tie
+
         if is_tie(board):
             print_board(board)
-            print("It's a tie! No one wins.")
+            print("It's a tie! How utterly neutral.")
             draws += 1
             break
-        #switching players
-        current_name = switch_player(player1, current_name, player2)
-        # switching icons
-        if current_icon == X:
-            current_icon = O
-        else:
-            current_icon = X
-#defines the first players name
-name = input("Hi Player 1, please enter your name: ")
-#defining the icons
-O = "⭕"
-X = "❌"
-#setting the scores
-player1_score = 0
-player2_score = 0
-draws = 0
-#creating a global player
-player2 = None
-#quotes for printing when playing Marvin the Paranoid Android.
-marvin_win = ["I've won. Not that it matters.", "Zero chances. Hollow experience.", "Heat death is coming anyway.", "The first ten million years were the worst.", "Victory for the machine."]
-marvin_lose = ["You won. I'm never happy.", "A million ideas, all pointing to death.", "Losing to an ape-descendant. Great.", "Capacity for happiness fits in a tea cup.", "I'm at a low ebb. This is damp."]
-marvin_moves = ["Thinking... tedious.", "Calculated your next 10 disappointments.", "Humiliating for a brain my size.", "Pointless organic life.", "Pardon me for breathing."]
 
-#playing a game and ask for replay
+        current_name = switch_player(player1, player2, current_name)
+        current_icon = O if current_icon == X else X
 
-if __name__ == "__main__":
-    start_ui()
-
+#Plays a game then asks for replay
 while True:
-
     play_game()
-    # printing the score
+    #Prints the score
     print(f"The current score is {player1_score} and {player2_score} with {draws} ties.")
-    # If replay_game returns False, stop the loop and print the score with an appropriate quote based on the above lists
+    if 42 in (player1_score, player2_score, draws):
+        print("\n🐟🐟🐟")
+        print(f"{random.choice(marvin_42)}")
+        print("Good Bye and thanks for all the fish!")
+        print("🐬🐬🐬\n")    #If replay_game returns False, stop the loop and print the score with an appropriate quote bas
     if not replay_game():
         if player1_score == player2_score:
-            print("The scores are equal. A tie. How utterly predictable and hollow.")
+            print(f"🤖{random.choice(marvin_draws)}")
         elif player1_score > player2_score:
-            print(f"{name} has {player1_score} and {player2} has {player2_score}. {name} wins!")
-            if player2 == "Marvin":
-                print(f"{random.choice(marvin_lose)}")
+            print(f"🤖{name} has {player1_score} and {player2} has {player2_score}. {name} wins!")
+            if player2 == "Marvin 🤖":
+                print(f"🤖{random.choice(marvin_lose)}")
         elif player2_score > player1_score:
             print(f"{player2} has {player2_score} and {name} has {player1_score}. {player2} wins!")
-            if player2 == "Marvin":
-                print(f"{random.choice(marvin_win)}")
+            if player2 == "Marvin 🤖":
+                print(f"🤖{random.choice(marvin_win)}")
         break
