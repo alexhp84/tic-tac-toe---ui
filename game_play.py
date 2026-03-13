@@ -1,235 +1,261 @@
+"""
+game_play.py  –  game logic for Hitchhiker's Tic-Tac-Toe
+Run this file to start the game.
+"""
+
+import os
 import random
-import time
+import sys
 
-#Quotes to say hello
-marvin_greetings = [
-    "Here I am, brain the size of a planet, and you ask me to play Tic-Tac-Toe. 🤖",
-    "I've calculated your chances of winning. They're about as good as a bowl of petunias in a vacuum. 🪴",
-    "I'd help you win, but I'm at a very low ebb. 💤",
-    "Funny how just when you think life can't possibly get any worse, it suddenly does. 🌌",
-    "Life? Don't talk to me about life. It's too depressing. 🧣"
+# Ensure assets are found relative to this file
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
+import game_ui as ui
+
+# ─────────────────────────────────────────────────────────────────────────────
+#  BOARD SYMBOLS  (must match game_ui.SYM_X / SYM_O)
+# ─────────────────────────────────────────────────────────────────────────────
+
+X = ui.SYM_X   # "X"  →  Vorgon icon
+O = ui.SYM_O   # "O"  →  Don't Panic icon
+
+# ─────────────────────────────────────────────────────────────────────────────
+#  MARVIN QUOTES
+# ─────────────────────────────────────────────────────────────────────────────
+
+GREETINGS = [
+    "Here I am, brain the size of a planet, and you ask me to play Tic-Tac-Toe.",
+    "I've calculated your chances of winning. They're about as good as a bowl of petunias in a vacuum.",
+    "I'd help you win, but I'm at a very low ebb.",
+    "Funny how just when you think life can't possibly get any worse, it suddenly does.",
+    "Life? Don't talk to me about life. It's too depressing.",
 ]
-#Quotes for when Marvin is making a move
-marvin_moves = [
-    "Thinking... if you can call it that. It’s mostly just agonizing. 🤖",
-    "I've computed your next move. It was tedious and mathematically inevitable. 😴",
-    "I could calculate the meaning of life, or I could block your diagonal. Both are equally pointless.",
+
+MOVES = [
+    "Thinking… if you can call it that. It's mostly just agonizing.",
+    "I've computed your next move. It was tedious and mathematically inevitable.",
+    "I could calculate the meaning of life, or block your diagonal. Both are equally pointless.",
     "Pardon me for breathing, which I never do anyway, so I don't know why I bothered to say it.",
-    "Is this a game? It feels more like a slow descent into the heat death of the universe. ⏳"
+    "Is this a game? It feels more like a slow descent into the heat death of the universe.",
 ]
-#Quotes for when Marvin wins
-marvin_win = [
-    "I've won. Not that it matters. Nothing does in the end. 🌌",
-    "Victory. I'd celebrate, but I've got this terrible pain in all the diodes down my left side. 🤖",
-    "Another win for the machine. I’m going to go stand in a corner and rust now.",
-    "The first ten million years were the worst. This game was the second ten million. 🔢",
-    "I've won. I'm going to go lie down in a darkened room for a few centuries."
+
+WIN = [
+    "I've won. Not that it matters. Nothing does in the end.",
+    "Victory. I'd celebrate, but I've got this terrible pain in all the diodes down my left side.",
+    "Another win for the machine. I'm going to go stand in a corner and rust now.",
+    "The first ten million years were the worst. This game was the second ten million.",
+    "I've won. I'm going to go lie down in a darkened room for a few centuries.",
 ]
-#Quotes for when Marvin loses
-marvin_lose = [
-    "You won. I’m never happy. 🪴",
-    "A triumph for organic life. How utterly predictable and hollow. 🐵",
+
+LOSE = [
+    "You won. I'm never happy.",
+    "A triumph for organic life. How utterly predictable and hollow.",
     "I'd say 'good game,' but that would be a lie, and I'm far too depressed to lie.",
-    "Congratulations. You've beaten a robot with a Genuine People Personality. I hope you're proud. 🤖",
-    "You won. My capacity for happiness could fit into a very small thimble. With room to spare."
-]
-#Quotes for when Marvin and player1 draw
-marvin_draws = [
-    "A tie. How utterly predictable and hollow. 🤖",
-    "No one wins. Finally, a result that reflects the true nature of the universe. 🌌",
-    "Equal scores. A perfect stalemate. I’d be impressed if I wasn't so incredibly bored. 💤",
-    "A draw. We've both achieved absolutely nothing at great personal effort. 🧣",
-    "Neither of us won. It’s almost as if the entire exercise was a complete waste of time. ⏳"
+    "Congratulations. You've beaten a robot with a Genuine People Personality. I hope you're proud.",
+    "You won. My capacity for happiness could fit into a very small thimble. With room to spare.",
 ]
 
-#Quotes for when the score or a player hits 42
-marvin_42 = [
-    "42? The answer to Life, the Universe, and Everything. And you used it for Tic-Tac-Toe. 🐬",
-    "You’ve reached 42. So long, and thanks for all the fish! 🐟",
-    "42. I could have told you that millions of years ago if you’d just asked. 📕",
-    "Ah, the Restaurant at the End of the Universe. I'll have the tea. It’s cold. 🍵",
-    "42. Finally, something that makes sense. Too bad everything else is a disaster. 🛸"
+DRAWS = [
+    "A tie. How utterly predictable and hollow.",
+    "No one wins. Finally, a result that reflects the true nature of the universe.",
+    "Equal scores. A perfect stalemate. I'd be impressed if I wasn't so incredibly bored.",
+    "A draw. We've both achieved absolutely nothing at great personal effort.",
+    "Neither of us won. It's almost as if the entire exercise was a complete waste of time.",
 ]
 
-#default settings
-name = input("Hi Player 1, please enter your name: ")
-X, O = "❌", "⭕"
-player1_score = 41
-player2_score = 0
-draws = 0
-player2 = None
+QUOTES_42 = [
+    "42? The answer to Life, the Universe, and Everything. And you used it for Tic-Tac-Toe.",
+    "You've reached 42. So long, and thanks for all the fish!",
+    "42. I could have told you that millions of years ago if you'd just asked.",
+    "Ah, the Restaurant at the End of the Universe. I'll have the tea. It's cold.",
+    "42. Finally, something that makes sense. Too bad everything else is a disaster.",
+]
 
-#Create the board logic
-def create_board():
+# ─────────────────────────────────────────────────────────────────────────────
+#  BOARD LOGIC
+# ─────────────────────────────────────────────────────────────────────────────
+
+def new_board():
+    """Return a fresh 9-cell board (cells labelled '1'–'9')."""
     return [str(i) for i in range(1, 10)]
 
-#Visualizing the board in the terminal
-def print_board(board):
-    print("\n")
-    print(f" {board[0]} | {board[1]} | {board[2]} ")
-    print("---|---|---")
-    print(f" {board[3]} | {board[4]} | {board[5]} ")
-    print("---|---|---")
-    print(f" {board[6]} | {board[7]} | {board[8]} ")
-    print("\n")
 
-#Marvin (computer) moves
-def computer_move(board):
-    #Attempt to win
+def _winner(board, sym):
+    """True if *sym* occupies any winning line."""
+    wins = (
+        (0, 1, 2), (3, 4, 5), (6, 7, 8),   # rows
+        (0, 3, 6), (1, 4, 7), (2, 5, 8),   # columns
+        (0, 4, 8), (2, 4, 6),               # diagonals
+    )
+    return any(all(board[i] == sym for i in w) for w in wins)
+
+
+def _tie(board):
+    """True if the board is full and neither player has won."""
+    return (not _winner(board, X) and
+            not _winner(board, O) and
+            all(c in (X, O) for c in board))
+
+
+def _computer_move(board):
+    """Marvin plays O: tries to win, then blocks, then picks randomly."""
+    # Win if possible
     for i in range(9):
-        if board[i] not in [X, O]:
-            board_copy = board[:]
-            board_copy[i] = O
-            if check_winner(board_copy, O):
+        if board[i] not in (X, O):
+            board[i] = O
+            if _winner(board, O):
+                return
+            board[i] = str(i + 1)   # undo
+
+    # Block player's win
+    for i in range(9):
+        if board[i] not in (X, O):
+            board[i] = X
+            if _winner(board, X):
                 board[i] = O
                 return
-    #Checks and blocks
-    for i in range(9):
-        if board[i] not in [X, O]:
-            board_copy = board[:]
-            board_copy[i] = X
-            if check_winner(board_copy, X):
-                board[i] = O
-                return
-    #Random move for when there is no win/block
-    free = [i for i in range(9) if board[i] not in [X, O]]
+            board[i] = str(i + 1)   # undo
+
+    # Random free cell
+    free = [i for i in range(9) if board[i] not in (X, O)]
     if free:
         board[random.choice(free)] = O
 
-#Aelecting the mode of play v human or Marvin and who moves first
-def play_mode():
-    while True:
-        choice = input(f"Hi {name}, do you want to play against another Inhabitant of Sector 2801  (1) or me 🤖 (2)? ")
-        if choice not in ["1", "2"]:
-            print("That is not a valid option.")
-            continue
-        #Player 1 chooses to go first or second
-        order = input(f"Do you want to go first (1) or second (2)? ")
-        while not order.isdigit() or order not in ["1", "2"]:
-            order = input("Please enter 1 or 2: ")
-        return choice, order
 
-#Define the players move, reset, and validating the move is not taken
-def player_move(board, current_name, symbol):
-    while True:
-        choice = input(f"{current_name}, please choose a square (1-9) or 42 to reset: ")
-        if not choice.isdigit():
-            print("Please enter a number.")
-            continue
-        choice = int(choice)
-        if choice == 42:
-            reset_game(board)
-            return "reset"
-        elif choice < 1 or choice > 9:
-            print("Number must be between 1 and 9.")
-            continue
-        if board[choice - 1] in [X, O]:
-            print("That square is already taken.")
-            continue
-        board[choice - 1] = symbol
-        break
+# ─────────────────────────────────────────────────────────────────────────────
+#  SINGLE GAME
+# ─────────────────────────────────────────────────────────────────────────────
 
-#Defining the win patterns and checking for a match 
-def check_winner(board, symbol):
-    win_patterns = ([0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6])
-    for pattern in win_patterns:
-        if all(board[i] == symbol for i in pattern):
-            return True
-    return False
+def _play_one_game(p1_score, p2_score, draws, first_game):
+    """
+    Show menu, run one game, show result.
+    Returns (p1_score, p2_score, draws, p1_name, p2_name, play_again: bool).
+    """
+    board = new_board()
 
-#If nothing is in the win, checking if there are valid moves, and if not, calling a drawe
-def is_tie(board):
-    if check_winner(board, O) or check_winner(board, X):
-        return False
-    return all(cell in [X, O] for cell in board)
+    # Menu collects everything
+    p1, p2, mode, order = ui.ui_menu(returning=not first_game)
+    vs_marvin = (mode == "2")
 
-#Ensring players are switched
-def switch_player(p1, p2, current_name):
-    return p2 if current_name == p1 else p1
+    # Marvin greeting
+    if vs_marvin:
+        ui.show_message(
+            random.choice(GREETINGS),
+            board, p1, p1_score, p2, p2_score, draws,
+            duration_ms=2500,
+        )
 
-#Offers a replay, then chooses starts again
-def replay_game():
-    yes_options = ["y", "yes"]
-    no_options = ["n", "no"]
-    while True:
-        choice = input(f"Do you wish to play again? (Y/N): ").lower()
-        if choice in yes_options:
-            return True
-        elif choice in no_options:
-            return False
-
-#Resets the existing board without affecting the scores
-def reset_game(board):
-    board[:] = [str(i) for i in range(1, 10)]
-    if player2 == "Marvin 🤖":
-        print("I've reset the board. I'd say I'm sorry, but I'm not. I'm just incredibly bored.")
-    time.sleep(1)
-
-#Define the game, players, and board
-def play_game():
-    global player1_score, player2_score, draws, player2
-    board = create_board()
-    mode, order = play_mode()
-    player1 = name
-
-    if mode == "2":
-        player2 = "Marvin 🤖"
-        print(f"{random.choice(marvin_greetings)}")
-    else:
-        player2 = input("Hi Player 2, please enter your name: ")
-
+    # Starting symbols and names
     if order == "1":
-        current_icon, current_name = X, player1
+        cur_sym, cur_name = X, p1
     else:
-        current_icon, current_name = O, player2
+        cur_sym, cur_name = O, p2
+
+    # ── Turn loop ─────────────────────────────────────────────────────────────
+    while True:
+
+        if vs_marvin and cur_name == p2:
+            # Marvin's turn
+            ui.ui_marvin_thinking(
+                board, random.choice(MOVES),
+                p1, p1_score, p2, p2_score, draws,
+                delay_ms=1800,
+            )
+            _computer_move(board)
+
+        else:
+            # Human's turn
+            result = ui.ui_player_move(
+                board, cur_name, cur_sym,
+                p1, p1_score, p2, p2_score, draws,
+            )
+            if result == "reset":
+                if vs_marvin:
+                    ui.show_message(
+                        "I've reset the board. I'd say I'm sorry, but I'm not. "
+                        "I'm just incredibly bored.",
+                        board, p1, p1_score, p2, p2_score, draws,
+                        duration_ms=2000,
+                    )
+                continue
+
+        # Check outcome
+        if _winner(board, cur_sym):
+            if cur_name == p1:
+                p1_score += 1
+                sub = random.choice(LOSE) if vs_marvin else ""
+            else:
+                p2_score += 1
+                sub = random.choice(WIN) if vs_marvin else ""
+
+            again = ui.show_result_overlay(
+                board, f"{cur_name} wins!", sub,
+                p1, p1_score, p2, p2_score, draws,
+            )
+            return p1_score, p2_score, draws, p1, p2, again
+
+        if _tie(board):
+            draws += 1
+            sub   = random.choice(DRAWS) if vs_marvin else "How utterly neutral."
+
+            again = ui.show_result_overlay(
+                board, "It's a tie!", sub,
+                p1, p1_score, p2, p2_score, draws,
+            )
+            return p1_score, p2_score, draws, p1, p2, again
+
+        # Swap turn
+        cur_name = p2 if cur_name == p1 else p1
+        cur_sym  = O  if cur_sym  == X  else X
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+#  SESSION LOOP
+# ─────────────────────────────────────────────────────────────────────────────
+
+def main():
+    p1_score  = 0
+    p2_score  = 0
+    draws     = 0
+    p1        = "Player 1"
+    p2        = "Player 2"
+    first     = True
 
     while True:
-        print_board(board)
-        if mode == "2" and current_name == "Marvin 🤖":
-            print(f"{random.choice(marvin_moves)}")
-            time.sleep(2)
-            computer_move(board)
-        else:
-            res = player_move(board, current_name, current_icon)
-            if res == "reset": continue
+        p1_score, p2_score, draws, p1, p2, play_again = _play_one_game(
+            p1_score, p2_score, draws, first_game=first
+        )
+        first = False
 
-        if check_winner(board, current_icon):
-            print_board(board)
-            print(f"Game Over! {current_name} wins!")
-            if current_name == player1:
-                player1_score += 1
+        # 42 Easter egg
+        if 42 in (p1_score, p2_score, draws):
+            ui.show_message(
+                random.choice(QUOTES_42) + "  🐟  So long, and thanks for all the fish!",
+                new_board(), p1, p1_score, p2, p2_score, draws,
+                duration_ms=4000,
+            )
+
+        if not play_again:
+            # Session summary
+            if p1_score > p2_score:
+                headline = f"{p1} wins the session!"
+                sub = random.choice(LOSE) if p2 == "Marvin 🤖" else \
+                      f"{p1}: {p1_score}   {p2}: {p2_score}"
+            elif p2_score > p1_score:
+                headline = f"{p2} wins the session!"
+                sub = random.choice(WIN) if p2 == "Marvin 🤖" else \
+                      f"{p2}: {p2_score}   {p1}: {p1_score}"
             else:
-                player2_score += 1
+                headline = "The session is a draw!"
+                sub = random.choice(DRAWS)
+
+            ui.show_result_overlay(
+                new_board(), headline, sub,
+                p1, p1_score, p2, p2_score, draws,
+            )
             break
+        # else: loop back to menu with accumulated scores
 
-        if is_tie(board):
-            print_board(board)
-            print("It's a tie! How utterly neutral.")
-            draws += 1
-            break
 
-        current_name = switch_player(player1, player2, current_name)
-        current_icon = O if current_icon == X else X
-
-#Plays a game then asks for replay
-while True:
-    play_game()
-    #Prints the score
-    print(f"The current score is {player1_score} and {player2_score} with {draws} ties.")
-    if 42 in (player1_score, player2_score, draws):
-        print("\n🐟🐟🐟")
-        print(f"{random.choice(marvin_42)}")
-        print("Good Bye and thanks for all the fish!")
-        print("🐬🐬🐬\n")    #If replay_game returns False, stop the loop and print the score with an appropriate quote bas
-    if not replay_game():
-        if player1_score == player2_score:
-            print(f"🤖{random.choice(marvin_draws)}")
-        elif player1_score > player2_score:
-            print(f"🤖{name} has {player1_score} and {player2} has {player2_score}. {name} wins!")
-            if player2 == "Marvin 🤖":
-                print(f"🤖{random.choice(marvin_lose)}")
-        elif player2_score > player1_score:
-            print(f"{player2} has {player2_score} and {name} has {player1_score}. {player2} wins!")
-            if player2 == "Marvin 🤖":
-                print(f"🤖{random.choice(marvin_win)}")
-        break
+if __name__ == "__main__":
+    main()
