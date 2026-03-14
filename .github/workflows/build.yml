@@ -37,8 +37,29 @@ jobs:
             --add-data "Harlow Solid Regular.ttf;." `
             game_play.py
 
-      - name: Upload build artifact
+      - name: Zip macOS app
+        if: runner.os == 'macOS'
+        run: |
+          cd dist
+          zip -r HitchhikersTTT-macOS.zip HitchhikersTTT.app
+
+      - name: Upload Linux artifact
+        if: runner.os == 'Linux'
         uses: actions/upload-artifact@v4
         with:
-          name: HitchhikersTTT-${{ matrix.os }}
-          path: dist/
+          name: HitchhikersTTT-Linux
+          path: dist/HitchhikersTTT
+
+      - name: Upload Windows artifact
+        if: runner.os == 'Windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: HitchhikersTTT-Windows
+          path: dist/HitchhikersTTT.exe
+
+      - name: Upload macOS artifact
+        if: runner.os == 'macOS'
+        uses: actions/upload-artifact@v4
+        with:
+          name: HitchhikersTTT-macOS
+          path: dist/HitchhikersTTT-macOS.zip
