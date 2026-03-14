@@ -1,0 +1,44 @@
+name: Build Executables
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install pyinstaller pygame
+
+      - name: Build (Linux and macOS)
+        if: runner.os != 'Windows'
+        run: |
+          pyinstaller --onefile --windowed --name HitchhikersTTT \
+            --add-data "*.png:." \
+            --add-data "Harlow Solid Regular.ttf:." \
+            game_play.py
+
+      - name: Build (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          pyinstaller --onefile --windowed --name HitchhikersTTT `
+            --add-data "*.png;." `
+            --add-data "Harlow Solid Regular.ttf;." `
+            game_play.py
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: HitchhikersTTT-${{ matrix.os }}
+          path: dist/
