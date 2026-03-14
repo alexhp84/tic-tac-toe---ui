@@ -1,62 +1,128 @@
-# Tic-Tac-Toe with Marvin 🤖
-A terminal Tic-Tac-Toe game featuring Marvin the Paranoid Android as the computer opponent, with various easter eggs and HHGTG references.
-UI based version  in development
+# 🚀 Hitchhiker's Guide to Tic-Tac-Toe
 
-## What it does
-- Offers two player modes - human vs human or human vs Marvin
-- The first player chooses to go first or second
-- Score tracking across multiple games
-- Enter 42 during a game to reset the board without losing scores
-- Reach a score of 42 for a surprise 🐟
+> *"Here I am, brain the size of a planet, and you ask me to play Tic-Tac-Toe."*
+> — Marvin the Paranoid Android
 
-## Requirements
-- Python 3.x
+A Hitchhiker's Guide to the Galaxy themed Tic-Tac-Toe game built in Python with a full pygame UI. Play against a friend or challenge Marvin the Paranoid Android, who will beat you whilst complaining about it.
 
-## How to run
+---
 
-### Windows
-1. Install Python from https://www.python.org/downloads/
-2. Make sure to check "Add Python to PATH" during installation
-3. Open Command Prompt and navigate to the project folder
+## 📸 Features
+
+- 🤖 **Play against Marvin** — the depressed robot with a Genuine People Personality, who will win, lose, and draw with equal amounts of misery
+- 👥 **Human vs Human** — two players on the same machine
+- 🎨 **Full pygame UI** — randomised Hitchhiker's Guide themed backgrounds, Vogon and Don't Panic icons, Harlow Solid font throughout
+- 🎙️ **Marvin quotes** — on greeting, each move, wins, losses, draws, and resets
+- 🔢 **42 Easter egg** — reach a score of 42 for a surprise
+- 🔄 **Abandon Hope** — reset the current board mid-game without losing scores
+- 📊 **Persistent scores** — scores carry across games in the same session
+- 🖥️ **Single menu screen** — enter names, pick opponent, choose who goes first, all in one place
+
+---
+
+## 🎮 How to Play
+
+- The menu screen collects Player 1's name, opponent choice, optional Player 2 name, and who goes first
+- **❌ = Vorgon** (Player 1) &nbsp;|&nbsp; **⭕ = Don't Panic** (Player 2 / Marvin)
+- Click a cell on the board to place your piece
+- First to get three in a row wins
+- Click **Abandon Hope** to reset the current board (scores are kept)
+- At the end of each game, choose **Play Again** to return to the menu or **Quit** for the session summary
+
+---
+
+## 🛠️ Requirements
+
+- Python 3.10+
+- pygame
+
 ```bash
-cd path\to\tic-tac-toe
-python tic-tac-toe.py
+pip install pygame
 ```
 
-### Mac
-1. Python 3 can be installed via https://www.python.org/downloads/ or Homebrew
+---
+
+## ▶️ Running the Game
+
 ```bash
-brew install python3
-```
-2. Open Terminal and navigate to the project folder
-```bash
-cd path/to/tic-tac-toe
-python3 tic-tac-toe.py
+python game_play.py
 ```
 
-### Linux
-1. Python 3 is usually pre-installed, if not:
-```bash
-sudo apt install python3
+> ⚠️ Always run `game_play.py`, not `game_ui.py`. Running `game_ui.py` directly will redirect you automatically.
+
+---
+
+## 📁 File Structure
+
 ```
-2. Navigate to the project folder
-```bash
-cd path/to/tic-tac-toe
-python3 tic-tac-toe.py
+tic-tac-toe---ui/
+│
+├── game_play.py            # Game logic and session loop — run this
+├── game_ui.py              # All pygame rendering and UI screens
+│
+├── Harlow Solid Regular.ttf
+├── arthur_dent.png         # Background image
+├── babel-fish.png          # Background image
+├── hitchikers.png          # Background image + menu title
+├── restaurant.png          # Background image
+├── marvin.png              # Marvin portrait (menu)
+├── vorgon.png              # Player 1 icon (❌)
+├── dont_panic.png          # Player 2 icon (⭕)
+└── magrathea.png
 ```
 
-## How to play
-- Enter your name when prompted
-- Choose your opponent and who goes first
-    - If human v human, player 2 also provides their name
-- Select squares 1-9 on your turn
-- Enter the answer to the Ultimate Question to reset the current game
-- Enter Y or N when asked to play again
+---
 
-## Notes
-- Player 1 is always ❌, Player 2 is always ⭕
-- Marvin will attempt to win or block before making a random move
-- Scores reset when you exit the game
+## 🏗️ Building Executables
 
-## Author
-[alexhp84](https://github.com/alexhp84)
+Builds for all three platforms are generated automatically via GitHub Actions on every push to `main`. Download the latest builds from the [Releases](../../releases) page:
+
+| Platform | File |
+|----------|------|
+| 🐧 Linux | `HitchhikersTTT` |
+| 🪟 Windows | `HitchhikersTTT.exe` |
+| 🍎 macOS | `HitchhikersTTT-macOS.zip` |
+
+### Building manually
+
+```bash
+pip install pyinstaller
+
+# Linux / macOS
+pyinstaller --onefile --windowed --name HitchhikersTTT \
+  --add-data "*.png:." \
+  --add-data "Harlow Solid Regular.ttf:." \
+  game_play.py
+
+# Windows
+pyinstaller --onefile --windowed --name HitchhikersTTT \
+  --add-data "*.png;." \
+  --add-data "Harlow Solid Regular.ttf;." \
+  game_play.py
+```
+
+---
+
+## 🌌 Marvin's Moods
+
+Marvin has a quote for every occasion:
+
+| Situation | Sample |
+|-----------|--------|
+| Greeting | *"I've calculated your chances of winning. They're about as good as a bowl of petunias in a vacuum."* |
+| His turn | *"I could calculate the meaning of life, or block your diagonal. Both are equally pointless."* |
+| He wins | *"Victory. I'd celebrate, but I've got this terrible pain in all the diodes down my left side."* |
+| You win | *"Congratulations. You've beaten a robot with a Genuine People Personality. I hope you're proud."* |
+| Draw | *"No one wins. Finally, a result that reflects the true nature of the universe."* |
+| Score hits 42 | *"42. I could have told you that millions of years ago if you'd just asked."* |
+
+---
+
+## 📜 Licence
+
+This project is for personal and educational use.  
+*Hitchhiker's Guide to the Galaxy* is the creation of Douglas Adams. All character references are used in tribute.
+
+---
+
+> *So long, and thanks for all the fish.* 🐬
