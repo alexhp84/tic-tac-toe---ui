@@ -8,7 +8,9 @@ import random
 import sys
 
 # Ensure assets are found relative to this file
-os.chdir(os.path.dirname(os.path.abspath(__file__)))
+import sys
+BASE = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+os.chdir(BASE)
 
 import game_ui as ui
 
