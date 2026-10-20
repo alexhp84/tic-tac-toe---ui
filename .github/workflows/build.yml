@@ -3,10 +3,15 @@ name: Build Executables
 on:
   push:
     branches: [main]
+    tags: ["v*"]
+
+permissions:
+  contents: write
 
 jobs:
   build:
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
@@ -21,10 +26,18 @@ jobs:
       - name: Install dependencies
         run: pip install pyinstaller pygame
 
-      - name: Build (Linux and macOS)
-        if: runner.os != 'Windows'
+      - name: Build (Linux)
+        if: runner.os == 'Linux'
         run: |
           pyinstaller --onefile --windowed --name HitchhikersTTT \
+            --add-data "*.png:." \
+            --add-data "Harlow Solid Regular.ttf:." \
+            game_play.py
+
+      - name: Build (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          pyinstaller --windowed --name HitchhikersTTT \
             --add-data "*.png:." \
             --add-data "Harlow Solid Regular.ttf:." \
             game_play.py
@@ -39,9 +52,7 @@ jobs:
 
       - name: Zip macOS app
         if: runner.os == 'macOS'
-        run: |
-          cd dist
-          zip -r HitchhikersTTT-macOS.zip HitchhikersTTT.app
+        run: ditto -c -k --keepParent dist/HitchhikersTTT.app dist/HitchhikersTTT-macOS.zip
 
       - name: Upload Linux artifact
         if: runner.os == 'Linux'
@@ -63,3 +74,21 @@ jobs:
         with:
           name: HitchhikersTTT-macOS
           path: dist/HitchhikersTTT-macOS.zip
+
+      - name: Attach to release (Linux)
+        if: runner.os == 'Linux' && startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/HitchhikersTTT
+
+      - name: Attach to release (Windows)
+        if: runner.os == 'Windows' && startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/HitchhikersTTT.exe
+
+      - name: Attach to release (macOS)
+        if: runner.os == 'macOS' && startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/HitchhikersTTT-macOS.zip
